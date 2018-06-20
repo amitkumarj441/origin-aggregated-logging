@@ -16,7 +16,7 @@ func main() {
 	kibana_pod := args[0]
 	es_svc := args[1]
 	index := args[2]
-	filePath := args[3]
+	filePath := args[3] // set to "journal" to look in the journal
 	querySize := args[4]
 	userName := args[5]
 	userToken := args[6]
@@ -33,7 +33,7 @@ func main() {
 
 	// instead of receiving jsonStream as an Arg, we'll make the call ourselves...
 	proxyHeaders := `-H 'X-Proxy-Remote-User: ` + userName + `' -H 'Authorization: Bearer ` + userToken + `' -H 'X-Forwarded-For: ` + testIP + `'`
-	queryCommand := `oc exec ` + kibana_pod + ` -- curl -s --key /etc/kibana/keys/key --cert /etc/kibana/keys/cert --cacert /etc/kibana/keys/ca ` + proxyHeaders + ` -XGET "https://` + es_svc + `/` + index + `.*/com.redhat.viaq.common/_search?q=hostname:` + hostname + `&fields=message&size=` + querySize + `"`
+	queryCommand := `oc exec ` + kibana_pod + ` -- curl -s --key /etc/kibana/keys/key --cert /etc/kibana/keys/cert --cacert /etc/kibana/keys/ca ` + proxyHeaders + ` -XGET "https://` + es_svc + `/` + index + `.*/_search?q=hostname:` + hostname + `&fields=message&size=` + querySize + `"`
 	if verbose {
 		fmt.Printf("Executing command [%s]\n", queryCommand)
 	}
@@ -94,7 +94,7 @@ func main() {
 		message := record.Fields.Message[0]
 
 		searchCmd := ""
-		if journal == "true" {
+		if filePath == "journal" || journal == "true" {
 			// escape certain characters that were being interpreted by bash
 			message = strings.Replace(message, `\`, `\\`, -1)
 			message = strings.Replace(message, `"`, `\"`, -1)

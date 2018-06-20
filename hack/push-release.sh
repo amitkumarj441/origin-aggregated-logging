@@ -38,9 +38,17 @@ images=(
   ${PREFIX}logging-elasticsearch
   ${PREFIX}logging-kibana
   ${PREFIX}logging-auth-proxy
-  ${PREFIX}logging-deployer
-  ${PREFIX}logging-deployment
+  ${PREFIX}logging-eventrouter
 )
+
+curbranch=$( git rev-parse --abbrev-ref HEAD )
+if [[ "${curbranch:-master}" == es5.x ]] ; then
+  images=(
+    ${PREFIX}logging-curator5
+    ${PREFIX}logging-elasticsearch5
+    ${PREFIX}logging-kibana5
+  )
+fi
 
 PUSH_OPTS=""
 if docker push --help | grep -q force; then
